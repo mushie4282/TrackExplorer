@@ -15,7 +15,7 @@ https://youtube.com/shorts/XE_INLto_ww?feature=share
 
 
 ## Features
-- TI EK-TM4C123GXL
+- TI EK-TM4C123GXL Tiva C Series LaunchPad
 - ADC
 - Hardware Pulse Width Modulation
 
