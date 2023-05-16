@@ -57,17 +57,17 @@ void Delay(void){
 	}
 // You use datasheet to calculate the following ADC values
 // then test your sensors to adjust the values 
-#define CRASH             IR15CM// if there is less than this distance ahead of the robot, it will immediately stop
-#define IR15CM            2233  // ADC output for 15cm:1.8v -> (1.8/3.3)*4095=2233 
-#define IR20CM            1724  // ADC output for 20cm:1.39v -> (1.39/3.3)*4095=1724
-#define IR30CM            1116  // ADC output for 30cm:0.9v -> (0.9/3.3)*4095=1116
-#define IR40CM            918   // ADC output for 40cm:0.74v -> (0.74/3.3)*4095=918
-#define IR80CM            447   // ADC output for 80cm:0.4v -> (0.4/3.3)*4095=496
+#define CRASH            IR15CM// if there is less than this distance ahead of the robot, it will immediately stop
+#define IR15CM           2233  // ADC output for 15cm:1.8v -> (1.8/3.3)*4095=2233 
+#define IR20CM           1724  // ADC output for 20cm:1.39v -> (1.39/3.3)*4095=1724
+#define IR30CM           1116  // ADC output for 30cm:0.9v -> (0.9/3.3)*4095=1116
+#define IR40CM           918   // ADC output for 40cm:0.74v -> (0.74/3.3)*4095=918
+#define IR80CM           447   // ADC output for 80cm:0.4v -> (0.4/3.3)*4095=496
                                 // with equal power to both motors (LeftH == RightH), the robot still may not drive straight
                                 // due to mechanical differences in the motors, so bias the left wheel faster or slower than
                                 // the constant right wheel					
-#define LEFTPOWER        	0.3*PERIOD   // duty cycle of left wheel 
-#define RIGHTPOWER        0.3*PERIOD   // duty cycle of left wheel
+#define LEFTPOWER        0.3*PERIOD   // duty cycle of left wheel 
+#define RIGHTPOWER       0.3*PERIOD   // duty cycle of left wheel
 	
 void System_Init(void);
 void steering(uint16_t ahead_dist,uint16_t right_dist, uint16_t left_dist);
@@ -75,10 +75,10 @@ uint8_t motorsFlag = 0; // motors' state flag
 	
 int main(void){
 	uint16_t left, right, ahead; // each sensor values
-	
-  DisableInterrupts();  // disable interrupts while initializing
-  System_Init();
-  EnableInterrupts();   // enable after all initialization are done
+
+	DisableInterrupts();  // disable interrupts while initializing
+	System_Init(); 		  // initialize system
+	EnableInterrupts();   // enable after all initialization are done
 
 	// TODO: Calibrate the sensors: read at least 10 times from the sensor 
 	// before the car starts to move: this will allow software to filter the sensor outputs.
@@ -86,26 +86,35 @@ int main(void){
 	{
 		ReadSensorsFIRFilter(&left, &ahead, &right);
 	}
-	
-  while(1){
+
+	while(1){
 		// check if the motors are on or if the flag has been set before sampling
 		if(motorsFlag || ((PWM0_ENABLE_R & PWM_ENABLE_PWM0EN) && (PWM1_ENABLE_R & PWM_ENABLE_PWM1EN)))
 		{
 			ReadSensorsFIRFilter(&left, &ahead, &right); //read IR sensors
 			steering(ahead,right,left); // steer the car based on the sensor values
 		}
-  }
+	}
 }
 
+/**
+ * @brief call functions to initialize MCU system
+ * 
+ */
 void System_Init(void) {
-  PLL_Init();            // bus clock at 16 MHz
-  Sensors_Init();        // initialize ADC to sample AIN2 (PE1), AIN9 (PE4), AIN8 (PE5)
-  LEDSW_Init();          // configure onboard LEDs and push buttons
-  Motors_Init();         // Initialize signals for the two DC Motors
-	Car_Dir_Init(); 			 // direction pin (PB2-PB5)
+	PLL_Init();            // bus clock at 16 MHz
+	Sensors_Init();        // initialize ADC to sample AIN2 (PE1), AIN9 (PE4), AIN8 (PE5)
+	LEDSW_Init();          // configure onboard LEDs and push buttons
+	Motors_Init();         // Initialize signals for the two DC Motors
+	Car_Dir_Init(); 	   // direction pin (PB2-PB5)
 	PWM_PB6PD1_Duty(LEFTPOWER, RIGHTPOWER); // set starting duty cycles
 }
 
+/**
+ * @brief Handles stopping and starting the track explorer using onboard swithces
+ * 	SW2 - Stop track explorer
+ *  SW1 - Start track explorer
+ */
 void GPIOPortF_Handler(void){
 	// PF0 (SW2) -> stop car
 	if(!(GPIO_PORTF_DATA_R & 0x01))

@@ -1,5 +1,8 @@
-// Motors.c
-// Runs on TM4C123 for CECS347 Project 2
+/**
+ * @file Motors.c
+ * @author Michelle Tran & Grecia Francisco
+ * @brief DC motor controls implementations
+ */
 #include "tm4c123gh6pm.h"
 #include "Motors.h"
 
@@ -39,7 +42,7 @@ void Motors_Init(void){
     
 	// Using PD1 M1PWM1
 	GPIO_PORTD_AFSEL_R |= 0x02;           // enable alt funct on PD1
-	GPIO_PORTD_PCTL_R &= ~0x000000F0;    	// configure PD0 as PWM0
+	GPIO_PORTD_PCTL_R &= ~0x000000F0;     // configure PD0 as PWM0
 	GPIO_PORTD_PCTL_R |= 0x00000050;
 	GPIO_PORTD_DEN_R |= 0x02;             // enable digital I/O on PD1
 	GPIO_PORTD_DR8R_R |= 0x02;            // 8mA
@@ -81,8 +84,6 @@ void turnRight(void)
 {
 	WHEEL_DIR = FORWARD;
 	PWM_PB6PD1_Duty(PERIOD * 0.3, 0);
-//	PWM0_ENABLE_R |= PWM_ENABLE_PWM0EN;
-//	PWM1_ENABLE_R &= ~PWM_ENABLE_PWM1EN;
 }
 
 // turn left by slowing down the left motor
@@ -90,8 +91,6 @@ void turnLeft(void)
 {
 	WHEEL_DIR = FORWARD;
 	PWM_PB6PD1_Duty(0, PERIOD * 0.3); 
-//	PWM0_ENABLE_R &= ~PWM_ENABLE_PWM0EN;
-//	PWM1_ENABLE_R |= PWM_ENABLE_PWM1EN;
 }
 
 // drive the motors at a certain duty cycle
